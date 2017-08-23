@@ -1,0 +1,110 @@
+<html>
+  <head>
+    <meta name="viewport"
+    content="initial-scale = 1.333,
+    minimum-scale = 1.333,
+    maximum-scale = 1.333" />
+    <script src="/angular.min.js"></script>
+    <style>
+      body {
+        font-family: "Helvetica";
+        font-size: 30px;
+      }
+      .box {
+        margin: 0 10%;
+      }
+      .question {
+        font-weight: bold;
+        padding: 30px 0;
+      }
+      .answer {
+        padding: 20px;
+        cursor: pointer;
+      }
+      .answer:hover {
+        background: #ccc;
+      }
+      .intro {
+        text-align: center;
+        margin-top: 100px;
+      }
+    </style>
+  </head>
+  <body ng-app="app" ng-controller="QuizController">
+    <div class="box">
+      <div class="intro" ng-show="current == -1">
+        <img src="fia.png" ng-click="next()">
+      </div>
+      <div class="quiz" ng-show="current >= 0 && current <= 9">
+        <div class="question">{{current + 1}}. {{quiz[current].question}}</div>
+        <div class="answer" ng-repeat="answer in quiz[current].answers" ng-click="giveAnswer($index)">
+          <span ng-show="$index == 0">1. </span>
+          <span ng-show="$index == 1">X. </span>
+          <span ng-show="$index == 2">2. </span>
+           {{answer}}
+        </div>
+      </div>
+      <div class="img-quiz" ng-show="current == 10">
+        <img src="image-quiz.png" style="position:absolute;top:0;right:0;bottom:0;left:0;width:100%;height:100%;">
+      </div>
+    </div>
+
+    <script>
+      var app = angular.module('app',[]);
+
+      app.controller('QuizController', function($scope, $http) {
+
+        $scope.giveAnswer = function(index) {
+          var question = $scope.current + 1;
+          var answer = index == 0 ? "1" : index == 1 ? "X" : "2";
+          $http.get("/answer/"+($scope.current+1)+"/"+answer).then(function () {
+            console.log("ok")
+            $scope.next();
+          }, function (error) {
+            console.log("error", error);
+          });
+        };
+
+        $scope.next = function() {
+          $scope.current++;
+        }
+
+        $scope.current = -1;
+
+        $scope.quiz = [
+          {
+            question: "Vad heter ABBs tvåarmade robot som är designad att jobba tillsammans med människor?",
+            answers: ["Frida", "Quasimodo", "YuMi"]
+          }, {
+            question: "Hur många år var Wall-E den enda kvarvarande roboten på jorden?",
+            answers: ["100", "300", "700"]
+          }, {
+            question: "Vad är ursprungsbetydelsen av ordet robot?",
+            answers: ["Slav", "Maskin", "Monster"]
+          }, {
+            question: "Vilket år kom den första serietillverkade industriroboten?",
+            answers: ["1951", "1961", "1971"]
+          }, {
+            question: "Vad heter författaren till robottrilogin “Jag, robot”?",
+            answers: ["Isaac Asimov", "George Orwell", "George Lucas"]
+          }, {
+            question: "Hur många robotlagar finns det?",
+            answers: ["3", "5", "7"]
+          }, {
+            question: "Vad utmärker HAL 9000?",
+            answers: ["Hans stora kropp", "Hans mörka röst", "Hans röda öga"]
+          }, {
+            question: "Vad heter Skynets huvudmotståndare?",
+            answers: ["Terminator", "John Connor", "Kyle Reese"]
+          }, {
+            question: "Vad heter robotföreningen vid Linköpings Universitet?",
+            answers: ["FIA", "IDA", "ANNA"]
+          }, {
+            question: "I vilket land arrangerades robot-VM i år där Linköpings Universitet deltog i fotbollsgrenen?",
+            answers: ["Tyskland", "Kina", "Japan"]
+          }
+        ];
+      });
+    </script>
+  </body>
+</html>
