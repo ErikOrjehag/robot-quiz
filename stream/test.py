@@ -77,14 +77,6 @@ class SoundReceiverModule(naoqi.ALModule):
         if( self.outfile != None ):
             self.outfile.close();
 
-    def stream_callback(self, in_data, frame_count, time_info, status):
-        while len(self.data) < frame_count:
-            time.sleep(0.01)
-        d = self.data[:frame_count]
-        self.data = self.data[frame_count:]
-        print(len(d), len(self.data))
-        return (d, pyaudio.paContinue)
-
     def processRemote( self, nbOfChannels, nbrOfSamplesByChannel, aTimeStamp, buffer ):
         """
         This is THE method that receives all the sound buffers from the "ALAudioDevice" module
