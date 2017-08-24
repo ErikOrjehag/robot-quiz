@@ -5,27 +5,24 @@ import time
 from naoqi import ALProxy
 
 if (len(sys.argv) < 2):
-    print "Usage: 'python play.py IP [PORT]'"
+    print "Usage: 'python play.py IP FILE'"
     sys.exit(1)
 
 IP = sys.argv[1]
 PORT = 9559
-if (len(sys.argv) > 2):
-    PORT = sys.argv[2]
+FILE = sys.argv[2]
+
 try:
     aup = ALProxy("ALAudioPlayer", IP, PORT)
+    aud = ALProxy("ALAudioDevice", IP, PORT)
 except Exception,e:
-    print "Could not create proxy to ALAudioPlayer"
+    print "Could not create proxies"
     print "Error was: ",e
     sys.exit(1)
 
-#plays a file and get the current position 5 seconds later
-fileId = aup.post.playFile("/usr/share/naoqi/wav/random.wav")
+volume = aud.getOutputVolume()
+aud.setOutputVolume(70)
+aup.playFile("/home/nao/" + FILE)
+aud.setOutputVolume(volume)
 
-time.sleep(5)
-
-#currentPos should be near 5 secs
-currentPos = aup.getCurrentPosition(fileId)
-fileLength = aup.getFileLength()
-
-print(currentPos, fileLength)
+print("DONE")

@@ -8,7 +8,7 @@
     <style>
       body {
         font-family: "Helvetica";
-        font-size: 30px;
+        font-size: 60px;
       }
       .box {
         margin: 0 10%;
@@ -33,7 +33,7 @@
   <body ng-app="app" ng-controller="QuizController">
     <div class="box">
       <div class="intro" ng-show="current == -1">
-        <img src="fia.png" ng-click="next()">
+        <img src="fia.png" ng-click="next()" style="width: 400px; height: 400px;">
       </div>
       <div class="quiz" ng-show="current >= 0 && current <= 9">
         <div class="question">{{current + 1}}. {{quiz[current].question}}</div>
