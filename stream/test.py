@@ -14,7 +14,6 @@ NAO_IP = "192.168.1.130"
 
 from optparse import OptionParser
 import naoqi
-import numpy as np
 import time
 import sys
 
@@ -37,7 +36,6 @@ class SoundReceiverModule(naoqi.ALModule):
             self.aOutfile = [None]*(4-1); # ASSUME max nbr channels = 4
             self.nSampleRate = 48000
             self.p = pyaudio.PyAudio()
-            self.data = np.array([])
         except BaseException, err:
             print( "ERR: abcdk.naoqitools.SoundReceiverModule: loading error: %s" % str(err) );
 
@@ -57,14 +55,8 @@ class SoundReceiverModule(naoqi.ALModule):
                         channels=4,
                         rate=self.nSampleRate,
                         output=True,
-                        #stream_callback=self.stream_callback
         )
-        #self.stream.start_stream()
         print( "INF: SoundReceiver: started!" );
-        # self.processRemote( 4, 128, [18,0], "A"*128*4*2 ); # for local test
-
-        # on romeo, here' the current order:
-        # 0: right;  1: rear;   2: left;   3: front,
 
     def stop( self ):
         print( "INF: SoundReceiver: stopping..." );
@@ -81,88 +73,17 @@ class SoundReceiverModule(naoqi.ALModule):
         """
         This is THE method that receives all the sound buffers from the "ALAudioDevice" module
         """
-        #~ print( "process!" );
-        #~ print( "processRemote: %s, %s, %s, lendata: %s, data0: %s (0x%x), data1: %s (0x%x)" % (nbOfChannels, nbrOfSamplesByChannel, aTimeStamp, len(buffer), buffer[0],ord(buffer[0]),buffer[1],ord(buffer[1])) );
-        #~ print( "raw data: " ),
-        #~ for i in range( 8 ):
-            #~ print( "%s (0x%x), " % (buffer[i],ord(buffer[i])) ),
-        #~ print( "" );
-
-        aSoundDataInterlaced = np.fromstring( str(buffer), dtype=np.int16 );
-        #~ print( "len data: %s " % len( aSoundDataInterlaced ) );
-        #~ print( "data interlaced: " ),
-        #~ for i in range( 8 ):
-            #~ print( "%d, " % (aSoundDataInterlaced[i]) ),
-        #~ print( "" );
-        aSoundData = np.reshape( aSoundDataInterlaced, (nbOfChannels, nbrOfSamplesByChannel), 'F' );
-        #~ print( "len data: %s " % len( aSoundData ) );
-        #print( "len data 0: %s " % len( aSoundData[0] ) );
-        if ( True ):
-            #fs = self.nSampleRate
-            #duration = 0.1
-            #f = 440.0
-            #samples = (np.sin(2*np.pi*np.arange(fs*duration)*f/fs)).astype(np.float32)
-
-            #self.data = np.concatenate([self.data, aSoundData[0] / 32767.0])
-            try:
-                self.stream.write(str(buffer))
-            except Exception as e:
-                print("GOT ERROR", e)
-
-
-        if( False ):
-            # compute average
-            aAvgValue = np.mean( aSoundData, axis = 1 );
-            print( "avg: %s" % aAvgValue );
-        if( False ):
-            # compute fft
-            nBlockSize = nbrOfSamplesByChannel;
-            signal = aSoundData[0] * np.hanning( nBlockSize );
-            aFft = ( np.fft.rfft(signal) / nBlockSize );
-            print aFft;
-        if( False ):
-            # compute peak
-            aPeakValue = np.max( aSoundData );
-            if( aPeakValue > 16000 ):
-                print( "Peak: %s" % aPeakValue );
-        if( False ):
-            bSaveAll = True;
-            # save to file
-            if( self.outfile == None ):
-                strFilenameOut = "/home/erik/out.raw";
-                print( "INF: Writing sound to '%s'" % strFilenameOut );
-                self.outfile = open( strFilenameOut, "wb" );
-                if( bSaveAll ):
-                    for nNumChannel in range( 1, nbOfChannels ):
-                        strFilenameOutChan = strFilenameOut.replace(".raw", "_%d.raw"%nNumChannel);
-                        self.aOutfile[nNumChannel-1] = open( strFilenameOutChan, "wb" );
-                        print( "INF: Writing other channel sound to '%s'" % strFilenameOutChan );
-
-            #~ aSoundDataInterlaced.tofile( self.outfile ); # wrote the 4 channels
-            aSoundData[0].tofile( self.outfile ); # wrote only one channel
-            #~ print( "aTimeStamp: %s" % aTimeStamp );
-            #~ print( "data wrotten: " ),
-            #~ for i in range( 8 ):
-                #~ print( "%d, " % (aSoundData[0][i]) ),
-            #~ print( "" );
-            #~ self.stop(); # make naoqi crashes
-            if( bSaveAll ):
-                for nNumChannel in range( 1, nbOfChannels ):
-                    aSoundData[nNumChannel].tofile( self.aOutfile[nNumChannel-1] );
-
-
-    # processRemote - end
+        try:
+            self.stream.write(str(buffer))
+        except Exception as e:
+            print("GOT ERROR", e)
 
 
     def version( self ):
         return "0.6";
 
-# SoundReceiver - end
-
-
 def main():
     """ Main entry point
-
     """
     parser = OptionParser()
     parser.add_option("--pip",
@@ -205,8 +126,6 @@ def main():
         print "Interrupted by user, shutting down"
         myBroker.shutdown()
         sys.exit(0)
-
-
 
 if __name__ == "__main__":
     main()
